@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Control List (ACL) in Networking</title>
+    <style>
+        body {
+            font-family: 'Century Gothic', sans-serif;
+            color: black;
+            margin: 2cm;
+            padding: 0;
+            line-height: 1.5;
+        }
+        h1, h2, h3 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        h2 {
+            border-bottom: 2px solid black;
+            padding-bottom: 5px;
+        }
+        ul {
+            margin-left: 20px;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-left: 5px solid #333;
+            font-family: monospace;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Access Control List (ACL) in Networking</h1>
+    
+    <h2>What is an Access Control List (ACL)?</h2>
+    <p>An Access Control List (ACL) is a set of rules that control network traffic and determine whether packets are permitted or denied as they pass through a network device such as a router or firewall. ACLs are widely used in networking for traffic filtering, security, and network management.</p>
+    
+    <h2>Why Use ACLs?</h2>
+    <ul>
+        <li><strong>Enhancing Security:</strong> Prevent unauthorized access to networks.</li>
+        <li><strong>Traffic Filtering:</strong> Control which packets enter or exit an interface.</li>
+        <li><strong>Restricting User Access:</strong> Limit access to network resources.</li>
+        <li><strong>Defining Quality of Service (QoS):</strong> Prioritize network traffic.</li>
+    </ul>
+    
+    <h2>Types of ACLs</h2>
+    
+    <h3>1️⃣ Standard ACLs</h3>
+    <p>Filter traffic based only on the source IP address.</p>
+    <ul>
+        <li><strong>Range:</strong> 1–99 (IPv4), 1300–1999 (Expanded Range)</li>
+        <li><strong>Usage:</strong> Block or allow specific hosts or networks.</li>
+    </ul>
+    <pre>
+Router(config)# access-list 10 permit 192.168.1.0 0.0.0.255
+Router(config)# access-list 10 deny any
+Router(config)# interface GigabitEthernet 0/1
+Router(config-if)# ip access-group 10 in
+    </pre>
+    <p><strong>✔️ This ACL allows traffic from the 192.168.1.0/24 network and denies all others.</strong></p>
+    
+    <h3>2️⃣ Extended ACLs</h3>
+    <p>Filter traffic based on multiple parameters:</p>
+    <ul>
+        <li>Source IP</li>
+        <li>Destination IP</li>
+        <li>Protocol (TCP, UDP, ICMP)</li>
+        <li>Port Numbers</li>
+    </ul>
+    <pre>
+Router(config)# access-list 110 permit tcp 192.168.1.0 0.0.0.255 any eq 80
+Router(config)# access-list 110 deny ip any any
+Router(config)# interface GigabitEthernet 0/2
+Router(config-if)# ip access-group 110 in
+    </pre>
+    <p><strong>✔️ This ACL allows HTTP (port 80) traffic from the 192.168.1.0/24 network and denies all other traffic.</strong></p>
+    
+    <h3>3️⃣ Numbered vs. Named ACLs</h3>
+    <pre>
+Router(config)# ip access-list extended Web_Traffic
+Router(config-ext-nacl)# permit tcp any host 192.168.1.100 eq 443
+Router(config-ext-nacl)# deny ip any any
+Router(config)# interface GigabitEthernet 0/3
+Router(config-if)# ip access-group Web_Traffic in
+    </pre>
+    <p><strong>✔️ This ACL allows only HTTPS (port 443) traffic to 192.168.1.100.</strong></p>
+    
+    <h2>Placement of ACLs</h2>
+    <ul>
+        <li><strong>Standard ACLs:</strong> Placed near the destination.</li>
+        <li><strong>Extended ACLs:</strong> Placed near the source.</li>
+    </ul>
+    
+    <h2>Wildcards in ACLs</h2>
+    <p>Wildcard masks determine which IPs to match.</p>
+    <pre>
+Wildcard Mask = 255.255.255.255 - Subnet Mask
+Example:
+Subnet Mask: 255.255.255.0
+Wildcard Mask: 0.0.0.255
+    </pre>
+    <p><strong>✔️ Matches all hosts in the 192.168.1.0/24 network.</strong></p>
+    
+    <h2>Common ACL Commands</h2>
+    <table>
+        <tr>
+            <th>Command</th>
+            <th>Description</th>
+        </tr>
+        <tr>
+            <td>access-list &lt;num&gt; permit/deny &lt;protocol&gt; &lt;src&gt; &lt;wildcard&gt; &lt;dst&gt; &lt;wildcard&gt; &lt;port&gt;</td>
+            <td>Define ACL rule</td>
+        </tr>
+        <tr>
+            <td>ip access-group &lt;ACL&gt; in/out</td>
+            <td>Apply ACL to an interface</td>
+        </tr>
+        <tr>
+            <td>show access-lists</td>
+            <td>View ACL rules</td>
+        </tr>
+        <tr>
+            <td>no access-list &lt;num&gt;</td>
+            <td>Delete ACL</td>
+        </tr>
+    </table>
+    
+    <h2>ACL Best Practices</h2>
+    <ul>
+        <li>✔️ Use extended ACLs for better control.</li>
+        <li>✔️ Apply standard ACLs close to the destination and extended ACLs close to the source.</li>
+        <li>✔️ Always end ACLs with <code>deny any any</code> (implicitly present in extended ACLs).</li>
+        <li>✔️ Use named ACLs for better organization.</li>
+        <li>✔️ Test ACLs with <code>show access-lists</code> before applying.</li>
+    </ul>
+    
+    <h2>Conclusion</h2>
+    <p>ACLs are essential tools for managing and securing network traffic. By implementing standard and extended ACLs correctly, administrators can control access, filter traffic, and enforce security policies efficiently.</p>
+</body>
+</html>
